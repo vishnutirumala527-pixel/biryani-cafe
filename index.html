@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="kn">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Biryani Cafe — QR Ordering</title>
+<style>
+:root{--green:#064B35;--cream:#FFF8E7;--lime:#A5D923;--ink:#173b2d;--muted:#64756b}
+*{box-sizing:border-box}body{margin:0;background:var(--cream);color:var(--ink);font-family:system-ui,"Noto Sans Kannada",sans-serif}
+header{background:var(--green);color:white;padding:18px 5%;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:2}
+.brand{font-weight:900;letter-spacing:1px;font-size:22px}.brand small{display:block;font-size:11px;letter-spacing:4px}
+button{border:0;border-radius:12px;padding:12px 16px;font-weight:750;background:var(--lime);color:var(--green);cursor:pointer}
+button.dark{background:var(--green);color:white}button:disabled{opacity:.45;cursor:not-allowed}
+main{max-width:1000px;margin:auto;padding:22px 16px}.hero{background:var(--green);color:white;border-radius:22px;padding:24px;margin:12px 0 24px}
+.hero h1{font-size:clamp(26px,5vw,42px);margin:4px 0}.hero p{color:#e8f3e9}.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+section{margin:24px 0}.section-head{display:flex;justify-content:space-between;align-items:center}
+.cards{display:flex;gap:14px;overflow:auto;padding:4px 2px 14px}.food{min-width:210px;background:white;border-radius:18px;padding:12px;box-shadow:0 4px 18px #173b2d12}
+.food .photo{height:125px;border-radius:12px;background:#e6eddc;display:grid;place-items:center;font-size:48px}.food h3{margin:10px 0 4px}.price{font-weight:850;color:var(--green)}
+.panel{background:white;border-radius:18px;padding:18px;box-shadow:0 4px 18px #173b2d10}
+input,select{padding:12px;border:1px solid #cbd7ca;border-radius:10px;width:100%;margin:6px 0 12px;font:inherit}
+label{font-size:14px;font-weight:700}.notice{background:#eff6df;border-radius:12px;padding:12px;margin:12px 0;font-size:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+.itemline{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid #edf0e8}
+.hidden{display:none}.muted{color:var(--muted);font-size:13px}
+nav{display:flex;gap:8px;flex-wrap:wrap}nav button{padding:9px 12px}
+#admin{margin-top:30px}.order{border:1px solid #e5eadf;padding:12px;border-radius:12px;margin:10px 0}
+footer{text-align:center;color:var(--muted);padding:28px;font-size:13px}
+</style></head>
+<body>
+<header><div class="brand">BIRIYANI CAFE<small>SCAN • ORDER • ENJOY</small></div><button onclick="speak('ನಮಸ್ಕಾರ, ಬಿರಿಯಾನಿ ಕೆಫೆಗೆ ಸ್ವಾಗತ')">🔊 ಸ್ವಾಗತ ಕೇಳಿ</button></header>
+<main>
+<div class="hero"><div class="muted" style="color:#cfe5d5">ನಿಮ್ಮ ಹತ್ತಿರದ ರುಚಿ</div><h1>ನಮಸ್ಕಾರ! 👋</h1><p>ನಿಮ್ಮ ನೆಚ್ಚಿನ ಬಿರಿಯಾನಿ ಆಯ್ಕೆ ಮಾಡಿ. ಆರ್ಡರ್ ಮಾಡಿ, ಕೌಂಟರ್‌ನಿಂದ ಪಡೆದುಕೊಳ್ಳಿ.</p><div class="row"><button onclick="voiceOrder()">🎙️ ಕನ್ನಡದಲ್ಲಿ ಆರ್ಡರ್ ಹೇಳಿ</button><button class="dark" onclick="document.querySelector('#menu').scrollIntoView()">ಮೆನು ನೋಡಿ</button></div></div>
+<section><div class="section-head"><h2>ನಮ್ಮ ಮೆನು</h2><span class="muted">ಬದಿಗೆ ಸರಿಸಿ →</span></div><div id="menuCards" class="cards"></div></section>
+<section class="grid">
+<div class="panel"><h2>ನಿಮ್ಮ ಆರ್ಡರ್</h2><div id="cart"><p class="muted">ಇನ್ನೂ ಯಾವುದೇ ಆಹಾರ ಆಯ್ಕೆ ಮಾಡಿಲ್ಲ.</p></div><div class="itemline"><b>ಒಟ್ಟು</b><b id="total">₹0</b></div>
+<div id="locationMsg" class="notice">ಆರ್ಡರ್ ಮಾಡುವ ಮೊದಲು ನಿಮ್ಮ Location ಪರಿಶೀಲಿಸಲಾಗುತ್ತದೆ. ಅಂಗಡಿಯ 100 ಮೀಟರ್ ಒಳಗೆ ಇರಬೇಕು.</div>
+<button class="dark" style="width:100%" onclick="placeOrder()">Location ಪರಿಶೀಲಿಸಿ & ಆರ್ಡರ್ ಮಾಡಿ</button></div>
+<div class="panel"><h2>ಗ್ರಾಹಕ ವಿವರಗಳು</h2><label>ನಿಮ್ಮ ಹೆಸರು</label><input id="custName" placeholder="ಹೆಸರು"><label>ಮೊಬೈಲ್ ನಂಬರ್</label><input id="custPhone" inputmode="numeric" placeholder="10 ಅಂಕಿಯ ಮೊಬೈಲ್ ನಂಬರ್"><p class="muted">ಈ ಡೆಮೊದಲ್ಲಿ ವಿವರಗಳು ಈ ಸಾಧನದ ಬ್ರೌಸರ್‌ನಲ್ಲಷ್ಟೇ ಉಳಿಯುತ್ತವೆ.</p></div>
+</section>
+<section id="admin"><div class="section-head"><h2>Admin Dashboard</h2><button onclick="toggleAdmin()">ತೆರೆಯಿರಿ / ಮುಚ್ಚಿ</button></div>
+<div id="adminPanel" class="panel hidden"><nav><button onclick="showTab('orders')">ಆರ್ಡರ್‌ಗಳು</button><button onclick="showTab('location')">ಅಂಗಡಿ Location</button><button onclick="showTab('foods')">ಮೆನು ನಿರ್ವಹಣೆ</button></nav>
+<div id="tab-orders"><h3>ಬಂದಿರುವ ಆರ್ಡರ್‌ಗಳು</h3><div id="orders"></div></div>
+<div id="tab-location" class="hidden"><h3>ಅಂಗಡಿಯ Location ಸೆಟ್ ಮಾಡಿ</h3><p class="muted">Admin ಅಂಗಡಿಯಲ್ಲಿರುವಾಗ ಈ ಬಟನ್ ಒತ್ತಿ. ಗ್ರಾಹಕರಿಗೆ 100 ಮೀಟರ್ ವ್ಯಾಪ್ತಿಯೊಳಗೆ ಮಾತ್ರ ಆರ್ಡರ್ ಅನುಮತಿ.</p><button class="dark" onclick="setShopLocation()">📍 ಈಗಿನ ಸ್ಥಳವನ್ನು ಅಂಗಡಿಯ Location ಆಗಿ ಸೆಟ್ ಮಾಡಿ</button><p id="shopLoc" class="notice">ಇನ್ನೂ Location ಸೆಟ್ ಆಗಿಲ್ಲ.</p><p><b>ವ್ಯಾಪ್ತಿ: 100 ಮೀಟರ್ (ಸ್ಥಿರ)</b></p></div>
+<div id="tab-foods" class="hidden"><h3>ಆಹಾರ ಸೇರಿಸಿ</h3><label>ಆಹಾರದ ಹೆಸರು</label><input id="newFood" placeholder="ಉದಾ: Chicken Biryani"><label>ಬೆಲೆ (₹)</label><input id="newPrice" type="number" placeholder="180"><button onclick="addFood()">ಆಹಾರ ಸೇರಿಸಿ</button><div id="foodAdmin"></div></div>
+</div></section>
+</main><footer>Biryani Cafe · Scan • Order • Enjoy</footer>
+<script>
+const initial=[{id:1,name:"Chicken Biryani",price:180,emoji:"🍗"},{id:2,name:"Egg Biryani",price:130,emoji:"🥚"},{id:3,name:"Veg Biryani",price:110,emoji:"🍚"}];
+let foods=JSON.parse(localStorage.foods||"null")||initial, cart={}, orders=JSON.parse(localStorage.orders||"[]"), shop=JSON.parse(localStorage.shop||"null");
+const $=id=>document.getElementById(id);
+function save(){localStorage.foods=JSON.stringify(foods);localStorage.orders=JSON.stringify(orders);localStorage.shop=JSON.stringify(shop)}
+function render(){ $('menuCards').innerHTML=foods.map(f=>`<div class="food"><div class="photo">${f.emoji||"🍛"}</div><h3>${f.name}</h3><div class="row"><span class="price">₹${f.price}</span><button onclick="addCart(${f.id})">ಸೇರಿಸಿ +</button></div></div>`).join("");renderCart();renderOrders();$('foodAdmin').innerHTML=foods.map(f=>`<div class="itemline">${f.name} — ₹${f.price}<button onclick="removeFood(${f.id})">ತೆಗೆದುಹಾಕಿ</button></div>`).join("");$('shopLoc').textContent=shop?`Location ಸೆಟ್ ಆಗಿದೆ: ${shop.lat.toFixed(5)}, ${shop.lon.toFixed(5)}`:"ಇನ್ನೂ Location ಸೆಟ್ ಆಗಿಲ್ಲ."}
+function addCart(id){cart[id]=(cart[id]||0)+1;renderCart()}
+function renderCart(){let entries=Object.entries(cart).filter(([id,q])=>q>0);$('cart').innerHTML=entries.length?entries.map(([id,q])=>{let f=foods.find(x=>x.id==id);return f?`<div class="itemline"><span>${f.name} × ${q}</span><span><button onclick="addCart(${id})">+</button> <button onclick="cart[${id}]--;renderCart()">−</button></span></div>`:""}).join(""):"<p class='muted'>ಇನ್ನೂ ಯಾವುದೇ ಆಹಾರ ಆಯ್ಕೆ ಮಾಡಿಲ್ಲ.</p>";$('total').textContent="₹"+entries.reduce((s,[id,q])=>s+(foods.find(f=>f.id==id)?.price||0)*q,0)}
+function setShopLocation(){if(!navigator.geolocation)return alert("ಈ ಬ್ರೌಸರ್ Location ಬೆಂಬಲಿಸುವುದಿಲ್ಲ");navigator.geolocation.getCurrentPosition(p=>{shop={lat:p.coords.latitude,lon:p.coords.longitude};save();render()},e=>alert("Location ಸಿಗಲಿಲ್ಲ. Permission ನೀಡಿ ಮತ್ತು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."),{enableHighAccuracy:true})}
+function distance(a,b,c,d){let R=6371000,x=(c-a)*Math.PI/180,y=(d-b)*Math.PI/180;let h=Math.sin(x/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(y/2)**2;return 2*R*Math.asin(Math.sqrt(h))}
+function placeOrder(){let name=$('custName').value.trim(),phone=$('custPhone').value.trim(),items=Object.entries(cart).filter(([id,q])=>q>0);if(!name||!/^[0-9]{10}$/.test(phone))return alert("ಹೆಸರು ಮತ್ತು ಸರಿಯಾದ 10 ಅಂಕಿಯ ಮೊಬೈಲ್ ನಂಬರ್ ನಮೂದಿಸಿ.");if(!items.length)return alert("ಮೊದಲು ಮೆನುವಿನಿಂದ ಆಹಾರ ಆಯ್ಕೆ ಮಾಡಿ.");if(!shop)return alert("Admin ಇನ್ನೂ ಅಂಗಡಿಯ Location ಸೆಟ್ ಮಾಡಿಲ್ಲ.");navigator.geolocation.getCurrentPosition(p=>{let d=distance(shop.lat,shop.lon,p.coords.latitude,p.coords.longitude);if(d>100){$('locationMsg').textContent=`ನೀವು ಅಂಗಡಿಯಿಂದ ಸುಮಾರು ${Math.round(d)} ಮೀಟರ್ ದೂರದಲ್ಲಿದ್ದೀರಿ. 100 ಮೀಟರ್ ಒಳಗೆ ಬಂದಾಗ ಮಾತ್ರ ಆರ್ಡರ್ ಮಾಡಬಹುದು.`;return alert("ಕ್ಷಮಿಸಿ! 100 ಮೀಟರ್ ವ್ಯಾಪ್ತಿಯೊಳಗೆ ಬಂದಾಗ ಮಾತ್ರ ಆರ್ಡರ್ ಮಾಡಬಹುದು.")}let lines=items.map(([id,q])=>{let f=foods.find(x=>x.id==id);return {name:f.name,qty:q,price:f.price}});orders.unshift({id:Date.now(),name,phone,items:lines,total:lines.reduce((s,x)=>s+x.qty*x.price,0),time:new Date().toLocaleString("kn-IN"),status:"Pending"});save();cart={};renderCart();renderOrders();alert("ನಿಮ್ಮ ಆರ್ಡರ್ ಸ್ವೀಕರಿಸಲಾಗಿದೆ! ಕೌಂಟರ್‌ನಲ್ಲಿ ಪಡೆದುಕೊಳ್ಳಿ.")},()=>alert("ಆರ್ಡರ್ ಮಾಡಲು Location Permission ಅಗತ್ಯ."),{enableHighAccuracy:true})}
+function renderOrders(){$('orders').innerHTML=orders.length?orders.map(o=>`<div class="order"><b>${o.name}</b> · ${o.phone}<p>${o.items.map(x=>`${x.name} × ${x.qty}`).join(", ")}</p><b>₹${o.total}</b><p class="muted">${o.time}</p><select onchange="status(${o.id},this.value)">${["Pending","Preparing","Ready","Completed","Cancelled"].map(s=>`<option ${o.status===s?"selected":""}>${s}</option>`).join("")}</select></div>`).join(""):"ಇನ್ನೂ ಆರ್ಡರ್ ಬಂದಿಲ್ಲ."}
+function status(id,s){orders=orders.map(o=>o.id===id?{...o,status:s}:o);save();renderOrders()}
+function toggleAdmin(){$('adminPanel').classList.toggle('hidden')}
+function showTab(t){["orders","location","foods"].forEach(x=>$("tab-"+x).classList.toggle("hidden",x!==t))}
+function addFood(){let n=$('newFood').value.trim(),p=Number($('newPrice').value);if(!n||p<=0)return alert("ಆಹಾರದ ಹೆಸರು ಮತ್ತು ಬೆಲೆ ನಮೂದಿಸಿ");foods.push({id:Date.now(),name:n,price:p,emoji:"🍛"});save();render();$('newFood').value="";$('newPrice').value=""}
+function removeFood(id){foods=foods.filter(f=>f.id!==id);delete cart[id];save();render()}
+function speak(t){if(!("speechSynthesis"in window))return alert("ಈ ಬ್ರೌಸರ್ Voice ಬೆಂಬಲಿಸುವುದಿಲ್ಲ");let u=new SpeechSynthesisUtterance(t);u.lang="kn-IN";speechSynthesis.speak(u)}
+function voiceOrder(){let SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR)return alert("Voice Recognition ಈ ಬ್ರೌಸರ್‌ನಲ್ಲಿ ಲಭ್ಯವಿಲ್ಲ. ಮೆನುವಿನಿಂದ ಆಹಾರ ಆಯ್ಕೆ ಮಾಡಿ.");let r=new SR();r.lang="kn-IN";r.onresult=e=>{let said=e.results[0][0].transcript.toLowerCase();alert("ನೀವು ಹೇಳಿದ್ದು: "+said+"\\nದಯವಿಟ್ಟು ಮೆನುವಿನಿಂದ ಸರಿಯಾದ ಆಹಾರ ಆಯ್ಕೆ ಮಾಡಿ.");};r.onerror=()=>alert("ಧ್ವನಿ ಕೇಳಿಸಲಿಲ್ಲ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.");r.start()}
+render();
+</script></body></html>
